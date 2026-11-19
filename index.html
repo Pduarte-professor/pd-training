@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0A0A0A">
+<title>PD Training</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,500;0,800;1,800&family=Inter:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#0A0A0A;--surface:#161514;--surface-2:#211F1D;--line:#2E2B28;--fg:#F5F3F0;--muted:#A39E98;--accent:#FF6B1A;--accent-ink:#1A0D05;--ok:#3DD68C;--err:#FF6B6B;--display:"Archivo","Arial Narrow",Arial,sans-serif;--body:"Inter",system-ui,-apple-system,sans-serif;color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;padding-top:env(safe-area-inset-top)}
+.wrap{max-width:520px;margin:0 auto;padding:0 16px 110px}
+header{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:14px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px}.brand svg{width:64px;height:auto}
+.brand b{font-family:var(--display);font-weight:800;letter-spacing:.14em;font-size:12px;color:var(--accent)}
+.out{border:1px solid var(--line);background:var(--surface);color:var(--muted);font:500 13px var(--body);padding:6px 12px;border-radius:999px;cursor:pointer}
+h1{font-family:var(--display);font-weight:800;font-style:italic;font-size:28px;line-height:1.1;margin:20px 0 4px;text-wrap:balance}
+h2{font-family:var(--display);font-weight:800;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px}
+.sub{color:var(--muted);margin:0}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:16px}
+.days button{border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:10px;padding:8px 0;font:500 12px var(--body);cursor:pointer;display:grid;gap:2px;justify-items:center}
+.days button small{color:var(--muted);font-size:11px}
+.days button[aria-pressed=true]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+.days button[aria-pressed=true] small{color:var(--accent-ink)}
+.progress{height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin:14px 0 4px}.progress i{display:block;height:100%;background:var(--accent)}
+.list{display:grid;gap:8px}
+.ex{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px}
+.ex .chk{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;cursor:pointer}
+.ex input{width:22px;height:22px;accent-color:var(--accent)}
+.n{font-weight:600}.d{color:var(--muted);font-size:13px}
+.ex.done .n{text-decoration:line-through;color:var(--muted)}
+.how{border:1px solid var(--accent);background:none;color:var(--accent);font:500 13px var(--body);border-radius:8px;padding:8px 10px;cursor:pointer;white-space:nowrap}
+.tech{grid-column:1/-1;border-top:1px solid var(--line);padding-top:10px;display:grid;gap:8px}
+.tech ol{margin:0;padding-left:20px}.tech a{color:var(--accent);font-weight:500}
+.del{background:none;border:0;color:var(--muted);font-size:20px;cursor:pointer;padding:6px 10px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px}
+.stat span{display:block;font-size:12px;color:var(--muted)}.stat strong{font-family:var(--display);font-weight:800;font-size:22px}.stat em{font-style:normal;font-size:12px;color:var(--ok);display:block}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;overflow-x:auto}
+.card svg{width:100%;height:auto;display:block}
+table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:8px 4px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}th{color:var(--muted);font-weight:500;font-size:12px}
+form.add{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+label{display:grid;gap:4px;font-size:12px;color:var(--muted)}
+.full{grid-column:1/-1}
+input,select,textarea{background:var(--surface-2);border:1px solid var(--line);color:var(--fg);border-radius:8px;padding:11px;font:16px var(--body);width:100%}
+.btn{grid-column:1/-1;border:0;background:var(--accent);color:var(--accent-ink);font:600 15px var(--body);border-radius:10px;padding:13px;cursor:pointer}
+.btn.ghost{background:var(--surface-2);color:var(--fg);border:1px solid var(--line)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.meal{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:4px}
+.meal .top{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.chat{display:grid;gap:8px;margin-top:16px}
+.msg{max-width:80%;padding:10px 12px;border-radius:14px;background:var(--surface-2);white-space:pre-wrap}
+.msg.me{justify-self:end;background:var(--accent);color:var(--accent-ink)}.msg small{display:block;font-size:11px;opacity:.7}
+.send{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:12px}.send .btn{padding:10px 16px}
+.student{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;width:100%;text-align:left;color:inherit;font:inherit;cursor:pointer}
+.av{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2);font-weight:600;color:var(--accent)}
+.pill{font-size:12px;padding:3px 10px;border-radius:99px;background:var(--surface-2);color:var(--muted);white-space:nowrap}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav div{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+nav button{border:0;background:none;color:var(--muted);font:500 11px var(--body);padding:10px 0 12px;display:grid;justify-items:center;gap:4px;cursor:pointer}
+nav button svg{width:22px;height:22px}nav button[aria-current=page]{color:var(--accent)}
+.toast{margin-top:8px;font-size:13px;color:var(--ok);min-height:1.2em}.toast.err{color:var(--err)}
+.tabs2{display:flex;gap:6px;margin:18px 0 6px}.tabs2 button{flex:1;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:10px;padding:10px;font:600 14px var(--body);cursor:pointer}.tabs2 button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.empty{color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:12px;padding:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <svg viewBox="0 0 320 180" aria-label="PD Training"><g transform="translate(160,0) skewX(-12) translate(-160,0)"><text x="170" y="82" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="90" fill="#FFF" stroke="#FF6B1A" stroke-width="6" paint-order="stroke" stroke-linejoin="round">PD</text></g><polyline points="20,115 90,115 100,107 110,115 122,115 128,123 140,88 152,136 161,115 178,115 188,105 200,115 300,115" fill="none" stroke="#FF6B1A" stroke-width="8" stroke-linecap="round"/></svg>
+      <b>TRAINING</b>
+    </div>
+    <button class="out" id="out" hidden>Sair</button>
+  </header>
+  <main id="view"><p class="sub" style="margin-top:20px">A carregar…</p></main>
+</div>
+<nav id="nav" hidden><div id="tabs"></div></nav>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+const SB_URL='https://ftevvmvdoggwhwkxpwlf.supabase.co';
+const SB_KEY='sb_publishable_a7Gp9bjkAyPaUTav_X8CMA_yNV8b7JX';
+const sb=supabase.createClient(SB_URL,SB_KEY);
+const S={me:null,tab:null,day:(new Date().getDay()+6)%7,student:null,students:[],open:null,authMode:'entrar'};
+const DAYS=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const yt=q=>'https://www.youtube.com/results?search_query='+encodeURIComponent(q+' técnica');
+const fd=d=>{const [y,m,dd]=String(d).slice(0,10).split('-');return dd+'/'+m};
+const icons={
+ treino:'<path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+ medidas:'<path d="M3 17l5-5 4 3 8-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+ comida:'<path d="M7 3v8a2 2 0 0 0 2 2v8M5 3v5M9 3v5M16 21V3c2 1 3 4 3 7h-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+ chat:'<path d="M4 5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
+ alunos:'<circle cx="9" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6M16 4.5a3.5 3.5 0 0 1 0 7M18 14c2 .6 3 2.8 3 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'
+};
+const TECH={
+ 'agachamento':[['Pés à largura dos ombros, abdómen contraído','Desce como se te sentasses, joelhos na direção dos pés','Desce até as coxas ficarem paralelas ao chão e sobe a empurrar o chão'],'não deixes os joelhos fugir para dentro nem arredondar as costas'],
+ 'supino':[['Omoplatas juntas e pés no chão','Desce o peso até ao peito com os cotovelos a cerca de 45°','Empurra para cima sem bloquear os cotovelos'],'não arqueies demasiado a lombar'],
+ 'remada':[['Costas direitas e joelhos ligeiramente fletidos','Puxa até ao abdómen e junta as omoplatas','Volta devagar'],'não balances o tronco para puxar'],
+ 'prancha':[['Cotovelos por baixo dos ombros','Corpo em linha reta da cabeça aos calcanhares','Contrai abdómen e glúteos e respira normalmente'],'não deixes a anca descer nem subir'],
+ 'peso morto':[['Barra junto às pernas, joelhos ligeiramente fletidos','Leva a anca para trás com as costas direitas','Sobe a empurrar a anca para a frente'],'não arredondes as costas'],
+ 'afundo':[['Dá um passo à frente','Desce o joelho de trás até quase tocar no chão','Empurra com a perna da frente para voltar'],'joelho da frente por cima do tornozelo']
+};
+function howTo(n){const k=Object.keys(TECH).find(k=>n.toLowerCase().includes(k));return k?{steps:TECH[k][0],warn:TECH[k][1]}:{steps:['Aquece bem antes de começar','Mantém uma postura controlada em todo o movimento','Respeita as séries, repetições e pausas indicadas'],warn:'se sentires dor, para e fala com o Pedro'};}
+const isPT=()=>S.me&&S.me.role==='pt';
+const sid=()=>isPT()?S.student:S.me.id;
+const stName=()=>{const s=S.students.find(x=>x.id===S.student);return s?(s.nome||s.email):''};
+
+async function q(p){const {data,error}=await p;if(error){console.error(error);throw error}return data}
+
+// ---------- autenticação ----------
+function vAuth(msg){
+ $('#nav').hidden=true;$('#out').hidden=true;
+ const reg=S.authMode==='registo';
+ $('#view').innerHTML=`<h1>${reg?'Criar conta':'Bem-vindo'}</h1><p class="sub">${reg?'Regista-te para receberes os teus treinos.':'Entra para veres os teus treinos.'}</p>
+ <div class="tabs2"><button data-m="entrar" aria-pressed="${!reg}">Entrar</button><button data-m="registo" aria-pressed="${reg}">Criar conta</button></div>
+ <form class="add" id="fa" style="margin-top:12px">
+ ${reg?`<label class="full">Nome<input id="a-nome" autocomplete="name" required></label><label class="full">Objetivo<input id="a-obj" placeholder="ex.: perder peso, ganhar força"></label>`:''}
+ <label class="full">E-mail<input type="email" id="a-email" autocomplete="email" required></label>
+ <label class="full">Palavra-passe<input type="password" id="a-pass" minlength="6" autocomplete="${reg?'new-password':'current-password'}" required></label>
+ <button class="btn" type="submit">${reg?'Criar conta':'Entrar'}</button></form>
+ ${reg?'':'<button class="btn ghost" id="forgot" style="margin-top:8px;width:100%">Esqueci-me da palavra-passe</button>'}
+ <div class="toast ${msg&&msg.err?'err':''}" id="toast">${esc(msg?msg.t:'')}</div>`;
+ document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{S.authMode=b.dataset.m;vAuth()});
+ const fg=$('#forgot');if(fg)fg.onclick=async()=>{const e=$('#a-email').value.trim();if(!e){vAuth({t:'Escreve primeiro o teu e-mail.',err:1});return}
+  const {error}=await sb.auth.resetPasswordForEmail(e,{redirectTo:location.origin+location.pathname});vAuth(error?{t:error.message,err:1}:{t:'Enviámos-te um e-mail para mudares a palavra-passe.'})};
+ $('#fa').onsubmit=async e=>{e.preventDefault();const email=$('#a-email').value.trim(),password=$('#a-pass').value;
+  if(reg){const {data,error}=await sb.auth.signUp({email,password,options:{data:{nome:$('#a-nome').value.trim(),objetivo:$('#a-obj').value.trim()},emailRedirectTo:location.origin+location.pathname}});
+   if(error)return vAuth({t:traduz(error.message),err:1});
+   if(!data.session){S.authMode='entrar';return vAuth({t:'Conta criada! Abre o e-mail que te enviámos e confirma a conta. Depois entra aqui.'})}
+  }else{const {error}=await sb.auth.signInWithPassword({email,password});if(error)return vAuth({t:traduz(error.message),err:1})}
+  boot();};
+}
+function traduz(m){if(/Invalid login/i.test(m))return 'E-mail ou palavra-passe errados.';if(/not confirmed/i.test(m))return 'Ainda não confirmaste o e-mail. Vê a tua caixa de correio.';if(/already registered/i.test(m))return 'Já existe uma conta com este e-mail. Usa "Entrar".';if(/at least 6/i.test(m))return 'A palavra-passe tem de ter pelo menos 6 caracteres.';return m}
+
+async function boot(){
+ const {data:{session}}=await sb.auth.getSession();
+ if(!session)return vAuth();
+ try{
+  const p=await q(sb.from('profiles').select('*').eq('id',session.user.id).maybeSingle());
+  if(!p)return vAuth({t:'Não encontrei o teu perfil. Fala com o Pedro.',err:1});
+  S.me=p;
+  if(isPT()){S.students=await q(sb.from('profiles').select('*').eq('role','aluno').order('nome'));if(!S.student&&S.students[0])S.student=S.students[0].id;S.tab=S.tab||'alunos'}
+  else S.tab=S.tab||'treino';
+  $('#out').hidden=false;$('#nav').hidden=false;render();
+ }catch(e){$('#view').innerHTML=`<p class="toast err">Erro a carregar: ${esc(e.message)}</p>`}
+}
+$('#out').onclick=async()=>{await sb.auth.signOut();S.me=null;S.tab=null;S.student=null;vAuth()};
+
+function tabsFor(){return isPT()?[['alunos','Alunos'],['treino','Treinos'],['medidas','Medidas'],['comida','Alimentação'],['chat','Mensagens']]:[['treino','Treino'],['medidas','Medidas'],['comida','Alimentação'],['chat','Mensagens']]}
+function render(){
+ const t=tabsFor();$('#tabs').style.gridTemplateColumns=`repeat(${t.length},1fr)`;
+ $('#tabs').innerHTML=t.map(([k,l])=>`<button data-tab="${k}" ${S.tab===k?'aria-current="page"':''}><svg viewBox="0 0 24 24" aria-hidden="true">${icons[k]}</svg>${l}</button>`).join('');
+ const v=$('#view');({treino:vTreino,medidas:vMedidas,comida:vComida,chat:vChat,alunos:vAlunos})[S.tab](v).catch(e=>v.innerHTML=`<p class="toast err">Erro: ${esc(e.message)}</p>`);
+}
+$('#tabs').onclick=e=>{const b=e.target.closest('[data-tab]');if(b){S.tab=b.dataset.tab;render();scrollTo(0,0)}};
+function selStudent(){if(!isPT())return '';if(!S.students.length)return '<p class="empty" style="margin-top:12px">Ainda não tens alunos. Envia-lhes o link da app para criarem conta.</p>';
+ return `<label style="margin-top:12px">Aluno<select id="f-st">${S.students.map(s=>`<option value="${s.id}" ${s.id===S.student?'selected':''}>${esc(s.nome||s.email)}</option>`).join('')}</select></label>`}
+function bindSel(v){const el=v.querySelector('#f-st');if(el)el.onchange=()=>{S.student=el.value;render()}}
+
+// ---------- alunos (treinador) ----------
+async function vAlunos(v){
+ const ids=S.students.map(s=>s.id);let tr=[];if(ids.length)tr=await q(sb.from('treinos').select('aluno_id,feito'));
+ v.innerHTML=`<h1>Os teus alunos</h1><p class="sub">${S.students.length} aluno(s) com conta na app</p>
+ <div class="list" style="margin-top:16px">${S.students.length?S.students.map(s=>{const t=tr.filter(x=>x.aluno_id===s.id),d=t.filter(x=>x.feito).length;
+  return `<button class="student" data-st="${s.id}"><span class="av">${esc((s.nome||s.email||'?')[0].toUpperCase())}</span><span><b>${esc(s.nome||s.email)}</b><br><span class="d">${esc(s.objetivo||'Sem objetivo definido')}</span></span><span class="pill">${d}/${t.length} feitos</span></button>`}).join(''):'<p class="empty">Ainda não há alunos. Partilha o link desta app com eles: criam conta em "Criar conta" e aparecem logo aqui.</p>'}</div>
+ <p class="sub" style="margin-top:14px;font-size:13px">Toca num aluno para gerir o plano de treino.</p>`;
+ v.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{S.student=b.dataset.st;S.tab='treino';render()});
+}
+
+// ---------- treino ----------
+async function vTreino(v){
+ if(isPT()&&!S.student){v.innerHTML='<h1>Treinos</h1>'+selStudent();return}
+ const all=await q(sb.from('treinos').select('*').eq('aluno_id',sid()).order('id'));
+ const list=all.filter(t=>t.dia===S.day),done=list.filter(t=>t.feito).length;
+ const head=isPT()?`<h1>Plano de ${esc(stName())}</h1><p class="sub">Cria e organiza os treinos da semana</p>${selStudent()}`:`<h1>Olá, ${esc((S.me.nome||'').split(' ')[0])}</h1><p class="sub">${S.me.objetivo?'Objetivo: '+esc(S.me.objetivo.toLowerCase()):'O teu plano da semana'}</p>`;
+ v.innerHTML=`${head}
+ <div class="days">${DAYS.map((d,i)=>{const n=all.filter(t=>t.dia===i).length;return `<button data-day="${i}" aria-pressed="${i===S.day}">${d}<small>${n?n+' ex.':'folga'}</small></button>`}).join('')}</div>
+ <h2>Treino de ${DAYS[S.day].toLowerCase()}</h2>
+ ${list.length?`<div class="progress"><i style="width:${Math.round(done/list.length*100)}%"></i></div><p class="sub">${done} de ${list.length} feitos</p>
+ <div class="list" style="margin-top:10px">${list.map(e=>{const o=S.open===e.id,t=howTo(e.exercicio);return `<div class="ex ${e.feito?'done':''}"><label class="chk"><input type="checkbox" data-chk="${e.id}" ${e.feito?'checked':''}><span><span class="n">${esc(e.exercicio)}</span><br><span class="d">${esc(e.series||'')}${e.carga?' · '+esc(e.carga):''}</span></span></label>
+ <span>${isPT()?`<button class="del" data-del="${e.id}" aria-label="Apagar">×</button>`:''}<button class="how" data-how="${e.id}" aria-expanded="${o}">Como fazer</button></span>
+ ${o?`<div class="tech"><ol>${t.steps.map(x=>`<li>${x}</li>`).join('')}</ol><span class="d">Atenção: ${t.warn}</span><a href="${yt(e.exercicio)}" target="_blank" rel="noopener">Ver vídeo no YouTube ›</a></div>`:''}</div>`}).join('')}</div>
+ ${!isPT()&&done?'<button class="btn ghost" id="reset" style="width:100%;margin-top:10px">Recomeçar este dia</button>':''}`
+ :`<p class="sub">${isPT()?'Ainda sem exercícios neste dia.':'Dia de descanso. Hidrata-te e dorme bem.'}</p>`}
+ ${isPT()?`<h2>Novo exercício (${DAYS[S.day]})</h2><form class="add" id="fp"><label class="full">Exercício<input id="p-ex" placeholder="ex.: Agachamento goblet" required></label>
+ <label>Séries × reps<input id="p-sr" placeholder="3 × 12" required></label><label>Carga ou nota<input id="p-c" placeholder="16 kg"></label>
+ <button class="btn" type="submit">Adicionar ao plano</button></form>`:''}<div class="toast" id="toast"></div>`;
+ bindSel(v);
+ v.querySelectorAll('[data-day]').forEach(b=>b.onclick=()=>{S.day=+b.dataset.day;render()});
+ v.querySelectorAll('[data-chk]').forEach(c=>c.onchange=async()=>{await q(sb.from('treinos').update({feito:c.checked}).eq('id',c.dataset.chk));render()});
+ v.querySelectorAll('[data-how]').forEach(b=>b.onclick=()=>{const k=+b.dataset.how;S.open=S.open===k?null:k;render()});
+ v.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{await q(sb.from('treinos').delete().eq('id',b.dataset.del));render()});
+ const r=$('#reset');if(r)r.onclick=async()=>{await q(sb.from('treinos').update({feito:false}).eq('aluno_id',sid()).eq('dia',S.day));render()};
+ const f=$('#fp');if(f)f.onsubmit=async e=>{e.preventDefault();await q(sb.from('treinos').insert({aluno_id:S.student,dia:S.day,exercicio:$('#p-ex').value.trim(),series:$('#p-sr').value.trim(),carga:$('#p-c').value.trim()}));render()};
+}
+
+// ---------- medidas ----------
+function chartSVG(m){
+ const W=320,H=150,p={l:34,r:12,t:12,b:24},ys=m.map(r=>+r.peso);
+ let lo=Math.floor(Math.min(...ys)-0.5),hi=Math.ceil(Math.max(...ys)+0.5);if(hi-lo<2)hi=lo+2;
+ const x=i=>p.l+(m.length===1?0.5:i/(m.length-1))*(W-p.l-p.r),y=v=>p.t+(hi-v)/(hi-lo)*(H-p.t-p.b);
+ const pts=m.map((r,i)=>x(i)+','+y(+r.peso)).join(' ');
+ return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Evolução do peso">${[lo,(lo+hi)/2,hi].map(t=>`<line x1="${p.l}" x2="${W-p.r}" y1="${y(t)}" y2="${y(t)}" stroke="var(--line)"/><text x="${p.l-6}" y="${y(t)+4}" text-anchor="end" font-size="10" fill="var(--muted)">${t%1?t.toFixed(1):t}</text>`).join('')}
+ <polygon points="${x(0)},${H-p.b} ${pts} ${x(m.length-1)},${H-p.b}" fill="var(--accent)" opacity=".12"/><polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>
+ ${m.map((r,i)=>`<circle cx="${x(i)}" cy="${y(+r.peso)}" r="${i===m.length-1?4.5:3}" fill="${i===m.length-1?'var(--accent)':'var(--bg)'}" stroke="var(--accent)" stroke-width="2"/>${m.length<=8||i===0||i===m.length-1?`<text x="${x(i)}" y="${H-6}" text-anchor="middle" font-size="10" fill="var(--muted)">${fd(r.data)}</text>`:''}`).join('')}</svg>`;
+}
+async function vMedidas(v){
+ if(isPT()&&!S.student){v.innerHTML='<h1>Medidas</h1>'+selStudent();return}
+ const m=await q(sb.from('medidas').select('*').eq('aluno_id',sid()).order('data'));
+ const last=m[m.length-1],first=m[0],wp=m.filter(r=>r.peso!=null);
+ const diff=(k,u)=>{if(m.length<2||last[k]==null||first[k]==null)return '';const d=last[k]-first[k];return d?`<em>${d>0?'+':''}${d.toFixed(1)} ${u}</em>`:''};
+ const val=(k)=>last&&last[k]!=null?String(last[k]).replace('.',','):'–';
+ v.innerHTML=`<h1>${isPT()?'Medidas de '+esc(stName()):'As tuas medidas'}</h1><p class="sub">${last?'Última avaliação a '+fd(last.data):'Ainda sem avaliações'}</p>${selStudent()}
+ ${last?`<h2>Desde o início</h2><div class="stats"><div class="stat"><span>Peso</span><strong>${val('peso')}</strong> kg${diff('peso','kg')}</div><div class="stat"><span>Massa gorda</span><strong>${val('gordura')}</strong> %${diff('gordura','%')}</div><div class="stat"><span>Cintura</span><strong>${val('cintura')}</strong> cm${diff('cintura','cm')}</div></div>`:''}
+ ${wp.length?`<h2>Evolução do peso (kg)</h2><div class="card">${chartSVG(wp)}</div>`:''}
+ ${m.length?`<h2>Histórico</h2><div class="card"><table><thead><tr><th>Data</th><th>Peso (kg)</th><th>MG (%)</th><th>Cintura (cm)</th></tr></thead><tbody>${m.slice().reverse().map(r=>`<tr><td>${fd(r.data)}</td><td>${r.peso??''}</td><td>${r.gordura??''}</td><td>${r.cintura??''}</td></tr>`).join('')}</tbody></table></div>`:''}
+ <h2>Nova avaliação</h2><form class="add" id="fm"><label>Peso (kg)<input type="number" step="0.1" id="f-peso" inputmode="decimal" required></label><label>Massa gorda (%)<input type="number" step="0.1" id="f-mg" inputmode="decimal"></label>
+ <label>Cintura (cm)<input type="number" step="0.5" id="f-cint" inputmode="decimal"></label><label>Data<input type="date" id="f-data" value="${new Date().toISOString().slice(0,10)}" required></label>
+ <button class="btn" type="submit">Guardar avaliação</button></form><div class="toast" id="toast"></div>`;
+ bindSel(v);
+ $('#fm').onsubmit=async e=>{e.preventDefault();const n=id=>{const x=$(id).value;return x===''?null:+x};
+  await q(sb.from('medidas').insert({aluno_id:sid(),data:$('#f-data').value,peso:n('#f-peso'),gordura:n('#f-mg'),cintura:n('#f-cint')}));render()};
+}
+
+// ---------- alimentação ----------
+async function vComida(v){
+ if(isPT()&&!S.student){v.innerHTML='<h1>Alimentação</h1>'+selStudent();return}
+ const meals=await q(sb.from('refeicoes').select('*').eq('aluno_id',sid()).order('id'));
+ const k=meals.reduce((a,m)=>a+(m.kcal||0),0),pr=meals.reduce((a,m)=>a+(m.proteina||0),0);
+ v.innerHTML=`<h1>${isPT()?'Alimentação de '+esc(stName()):'Sugestões do dia'}</h1><p class="sub">${isPT()?'Escreve sugestões para cada refeição':'Plano preparado pelo Pedro para o teu objetivo'}</p>${selStudent()}
+ ${meals.length?`<h2>Total diário</h2><div class="stats"><div class="stat"><span>Energia</span><strong>${k}</strong> kcal</div><div class="stat"><span>Proteína</span><strong>${pr}</strong> g</div><div class="stat"><span>Refeições</span><strong>${meals.length}</strong></div></div>
+ <h2>Refeições</h2><div class="list">${meals.map(m=>`<div class="meal"><div class="top"><b>${esc(m.nome)}</b><span class="d">${m.kcal?m.kcal+' kcal':''}${m.proteina?' · '+m.proteina+' g prot.':''}${isPT()?` <button class="del" data-del="${m.id}" aria-label="Apagar">×</button>`:''}</span></div><span>${esc(m.descricao||'')}</span></div>`).join('')}</div>`
+ :`<p class="empty" style="margin-top:16px">${isPT()?'Ainda sem refeições para este aluno.':'O Pedro ainda não te deixou sugestões.'}</p>`}
+ ${isPT()?`<h2>Nova refeição</h2><form class="add" id="fr"><label class="full">Refeição<input id="r-n" placeholder="ex.: Pequeno-almoço" required></label><label class="full">Sugestão<textarea id="r-d" rows="2" placeholder="ex.: Iogurte grego, aveia e fruta"></textarea></label>
+ <label>kcal<input type="number" id="r-k" inputmode="numeric"></label><label>Proteína (g)<input type="number" id="r-p" inputmode="numeric"></label><button class="btn" type="submit">Adicionar refeição</button></form>`:''}
+ <p class="sub" style="margin-top:14px;font-size:13px">Sugestões gerais de alimentação saudável. Em caso de condição clínica, segue a orientação de um nutricionista.</p>`;
+ bindSel(v);
+ v.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{await q(sb.from('refeicoes').delete().eq('id',b.dataset.del));render()});
+ const f=$('#fr');if(f)f.onsubmit=async e=>{e.preventDefault();const n=id=>{const x=$(id).value;return x===''?null:+x};
+  await q(sb.from('refeicoes').insert({aluno_id:S.student,nome:$('#r-n').value.trim(),descricao:$('#r-d').value.trim(),kcal:n('#r-k'),proteina:n('#r-p')}));render()};
+}
+
+// ---------- mensagens ----------
+async function vChat(v){
+ if(isPT()&&!S.student){v.innerHTML='<h1>Mensagens</h1>'+selStudent();return}
+ const c=await q(sb.from('mensagens').select('*').eq('aluno_id',sid()).order('created_at'));
+ v.innerHTML=`<h1>Mensagens</h1><p class="sub">${isPT()?'Conversa com '+esc(stName()):'Fala diretamente com o Pedro'}</p>${selStudent()}
+ <div class="chat">${c.length?c.map(m=>{const mine=isPT()?m.de_treinador:!m.de_treinador;const t=new Date(m.created_at);return `<div class="msg ${mine?'me':''}">${esc(m.texto)}<small>${fd(m.created_at)} ${t.toTimeString().slice(0,5)}</small></div>`}).join(''):'<p class="empty">Ainda não há mensagens.</p>'}</div>
+ <form class="send" id="fs"><input id="f-msg" placeholder="Escreve uma mensagem" aria-label="Mensagem" required autocomplete="off"><button class="btn" type="submit">Enviar</button></form>`;
+ bindSel(v);
+ $('#fs').onsubmit=async e=>{e.preventDefault();await q(sb.from('mensagens').insert({aluno_id:sid(),de_treinador:isPT(),texto:$('#f-msg').value.trim()}));render()};
+}
+
+sb.auth.onAuthStateChange((ev)=>{if(ev==='PASSWORD_RECOVERY'){const p=prompt('Nova palavra-passe (mínimo 6 caracteres):');if(p)sb.auth.updateUser({password:p}).then(()=>boot())}});
+boot();
+</script>
+</body>
+</html>
