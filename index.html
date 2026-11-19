@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0A0A0A">
 <title>PD Training</title>
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="PD Training">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,500;0,800;1,800&family=Inter:wght@400;500;600&display=swap">
 <style>
@@ -237,7 +243,7 @@ async function vComida(v){
  const porDia=meals.some(m=>/^(Seg|Ter|Qua|Qui|Sex|Sáb|Dom):/m.test(m.descricao||''));
  const doDia=t=>{if(!porDia)return t||'';const l=(t||'').split('\n').find(x=>x.startsWith(DAYS[S.day]+':'));return l?l.slice(DAYS[S.day].length+1).trim():(/^(Seg|Ter|Qua|Qui|Sex|Sáb|Dom):/m.test(t||'')?'—':t||'')};
  v.innerHTML=`<h1>${isPT()?'Alimentação de '+esc(stName()):'Sugestões do dia'}</h1><p class="sub">${isPT()?'Escreve sugestões para cada refeição':'Plano preparado pelo Pedro para o teu objetivo'}</p>${selStudent()}
- ${meals.length?`<h2>Total diário</h2><div class="stats"><div class="stat"><span>Energia</span><strong>${k}</strong> kcal</div><div class="stat"><span>Proteína</span><strong>${pr}</strong> g</div><div class="stat"><span>Refeições</span><strong>${meals.length}</strong></div></div>
+ ${meals.length?`<h2>Total diário</h2><div class="stats"><div class="stat"><span>Energia</span><strong>${k}</strong> kcal</div>${pr?`<div class="stat"><span>Proteína</span><strong>${pr}</strong> g</div>`:''}<div class="stat"><span>Refeições</span><strong>${meals.length}</strong></div></div>
  ${porDia?`<div class="days">${DAYS.map((d,i)=>`<button data-fday="${i}" aria-pressed="${i===S.day}">${d}</button>`).join('')}</div>`:''}
  <h2>Refeições${porDia?' de '+DIAS[S.day]:''}</h2><div class="list">${meals.map(m=>`<div class="meal"><div class="top"><b>${esc(m.nome)}</b><span class="d">${m.kcal?m.kcal+' kcal':''}${m.proteina?' · '+m.proteina+' g prot.':''}${isPT()?` <button class="del" data-del="${m.id}" aria-label="Apagar">×</button>`:''}</span></div><span style="white-space:pre-line">${esc(doDia(m.descricao))}</span></div>`).join('')}</div>`
  :`<p class="empty" style="margin-top:16px">${isPT()?'Ainda sem refeições para este aluno.':'O Pedro ainda não te deixou sugestões.'}</p>`}
