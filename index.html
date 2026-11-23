@@ -239,8 +239,9 @@ async function vMedidas(v){
 async function vComida(v){
  if(isPT()&&!S.student){v.innerHTML='<h1>Alimentação</h1>'+selStudent();return}
 if(S.food==='compras')return vCompras(v);
+if(S.food==='sup')return vSup(v);
  const meals=await q(sb.from('refeicoes').select('*').eq('aluno_id',sid()).order('id'));
- const k=meals.reduce((a,m)=>a+(m.kcal||0),0),pr=meals.reduce((a,m)=>a+(m.proteina||0),0);
+ meals.splice(0,meals.length,...meals.filter(m=>!isSup(m)));const k=meals.reduce((a,m)=>a+(m.kcal||0),0),pr=meals.reduce((a,m)=>a+(m.proteina||0),0);
  const porDia=meals.some(m=>/^(Seg|Ter|Qua|Qui|Sex|Sáb|Dom):/m.test(m.descricao||''));
  const doDia=t=>{if(!porDia)return t||'';const l=(t||'').split('\n').find(x=>x.startsWith(DAYS[S.day]+':'));return l?l.slice(DAYS[S.day].length+1).trim():(/^(Seg|Ter|Qua|Qui|Sex|Sáb|Dom):/m.test(t||'')?'—':t||'')};
  v.innerHTML=`<h1>${isPT()?'Alimentação de '+esc(stName()):'Sugestões do dia'}</h1><p class="sub">${isPT()?'Escreve sugestões para cada refeição':'Plano preparado pelo Pedro para o teu objetivo'}</p>${selStudent()}${foodTabs()}
@@ -259,7 +260,7 @@ if(S.food==='compras')return vCompras(v);
 }
 
 // ---------- lista de compras ----------
-function foodTabs(){return `<div class="tabs2"><button data-food="plano" aria-pressed="${S.food!=='compras'}">Plano</button><button data-food="compras" aria-pressed="${S.food==='compras'}">Lista de compras</button></div>`}
+function foodTabs(){return `<div class="tabs2"><button data-food="plano" aria-pressed="${S.food==='plano'}">Plano</button><button data-food="compras" aria-pressed="${S.food==='compras'}">Compras</button><button data-food="sup" aria-pressed="${S.food==='sup'}">Suplementos</button></div>`}
 function bindFood(v){v.querySelectorAll('[data-food]').forEach(b=>b.onclick=()=>{S.food=b.dataset.food;render()})}
 const SEC=[
 ['Talho e peixaria',['frango','peru','carne','vaca','porco','novilho','bife','hamburguer','hambúrguer','salmão','salmao','pescada','peixe','bacalhau','dourada','robalo','camarão','sardinha','pota','lula','fiambre','presunto']],
@@ -306,7 +307,7 @@ function getCk(){try{return new Set(JSON.parse(localStorage.getItem(ckKey())||'[
 function setCk(s){try{localStorage.setItem(ckKey(),JSON.stringify([...s]))}catch(e){}}
 async function vCompras(v){
 const meals=await q(sb.from('refeicoes').select('*').eq('aluno_id',sid()).order('id'));
-const L=shopList(meals),ck=getCk(),order=[...SEC.map(s=>s[0]),'Outros'].filter(s=>L[s]);
+const sups=meals.filter(isSup),L=shopList(meals.filter(m=>!isSup(m))),ck=getCk();if(sups.length)L['Suplementos']=sups.map(m=>({key:'sup:'+supName(m),name:supName(m),u:{},vezes:0}));const order=[...SEC.map(s=>s[0]),'Outros','Suplementos'].filter(s=>L[s]);
 const total=order.reduce((a,s)=>a+L[s].length,0),feitos=order.reduce((a,s)=>a+L[s].filter(e=>ck.has(e.key)).length,0);
 v.innerHTML=`<h1>${isPT()?'Compras de '+esc(stName()):'Lista de compras'}</h1><p class="sub">Para a semana inteira, feita a partir do plano de alimentação</p>${selStudent()}${foodTabs()}
 ${total?`<div class="progress"><i style="width:${Math.round(feitos/total*100)}%"></i></div><p class="sub">${feitos} de ${total} no carrinho</p>
@@ -321,6 +322,22 @@ v.querySelectorAll('[data-ck]').forEach(c=>c.onchange=()=>{const s=getCk();c.che
 const nw=$('#newweek');if(nw)nw.onclick=()=>{setCk(new Set());render()};
 const cp=$('#copy');if(cp)cp.onclick=async()=>{const txt='Lista de compras\n'+order.map(s=>'\n'+s.toUpperCase()+'\n'+L[s].map(e=>'- '+e.name+(fmtQ(e)?' ('+fmtQ(e)+')':'')).join('\n')).join('\n');
 try{await navigator.clipboard.writeText(txt);$('#toast').textContent='Lista copiada. Podes colar no WhatsApp ou nas notas.'}catch(e){$('#toast').textContent='Não consegui copiar neste telemóvel.'}};
+}
+
+// ---------- suplementação ----------
+const isSup=m=>/^suplement/i.test(m.nome||'');
+const supName=m=>(m.nome||'').replace(/^suplementos?\s*:?\s*/i,'')||'Suplemento';
+async function vSup(v){
+const all=await q(sb.from('refeicoes').select('*').eq('aluno_id',sid()).order('id'));const sups=all.filter(isSup);
+const row=l=>{const i=l.indexOf(':');return i>0&&i<15?`<span class="d"><b style="color:var(--fg);font-weight:600">${esc(l.slice(0,i))}:</b>${esc(l.slice(i+1))}</span>`:`<span class="d">${esc(l)}</span>`};
+v.innerHTML=`<h1>${isPT()?'Suplementação de '+esc(stName()):'Suplementação'}</h1><p class="sub">${isPT()?'Suplementos recomendados a este aluno':'Os suplementos que o Pedro te recomendou'}</p>${selStudent()}${foodTabs()}
+${sups.length?`<div class="list" style="margin-top:12px">${sups.map(m=>`<div class="meal"><div class="top"><b>${esc(supName(m))}</b>${isPT()?`<button class="del" data-del="${m.id}" aria-label="Apagar">×</button>`:''}</div>${String(m.descricao||'').split('\n').filter(Boolean).map(row).join('')}</div>`).join('')}</div>`:`<p class="empty" style="margin-top:16px">${isPT()?'Ainda sem suplementos para este aluno.':'O Pedro ainda não te recomendou suplementos.'}</p>`}
+${isPT()?`<h2>Novo suplemento</h2><form class="add" id="fsup"><label class="full">Suplemento<input id="s-n" placeholder="ex.: Creatina monohidratada" required></label><label>Dose<input id="s-d" placeholder="5 g por dia"></label><label>Quando<input id="s-q" placeholder="todos os dias"></label><label class="full">Sugestão de compra<input id="s-c" placeholder="marca, tamanho"></label><button class="btn" type="submit">Adicionar suplemento</button></form>`:''}
+<p class="sub" style="margin-top:14px;font-size:13px">Os suplementos complementam a alimentação, não a substituem. Em caso de doença ou medicação, fala primeiro com o médico.</p>`;
+bindSel(v);bindFood(v);
+v.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{await q(sb.from('refeicoes').delete().eq('id',b.dataset.del));render()});
+const f=$('#fsup');if(f)f.onsubmit=async e=>{e.preventDefault();const d=[['Dose','#s-d'],['Quando','#s-q'],['Comprar','#s-c']].map(([k,i])=>{const x=$(i).value.trim();return x?k+': '+x:''}).filter(Boolean).join('\n');
+await q(sb.from('refeicoes').insert({aluno_id:S.student,nome:'Suplemento: '+$('#s-n').value.trim(),descricao:d,kcal:null,proteina:null}));render()};
 }
 
 // ---------- mensagens ----------
