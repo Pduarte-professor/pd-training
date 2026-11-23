@@ -329,14 +329,15 @@ const isSup=m=>/^suplement/i.test(m.nome||'');
 const supName=m=>(m.nome||'').replace(/^suplementos?\s*:?\s*/i,'')||'Suplemento';
 async function vSup(v){
 const all=await q(sb.from('refeicoes').select('*').eq('aluno_id',sid()).order('id'));const sups=all.filter(isSup);
-const row=l=>{const i=l.indexOf(':');return i>0&&i<15?`<span class="d"><b style="color:var(--fg);font-weight:600">${esc(l.slice(0,i))}:</b>${esc(l.slice(i+1))}</span>`:`<span class="d">${esc(l)}</span>`};
+const lk=s=>esc(s).replace(/https?:\/\/[^\s<]+/g,u=>`<a href="${u}" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600">Abrir loja ›</a>`);
+const row=l=>{const i=l.indexOf(':');return i>0&&i<15?`<span class="d"><b style="color:var(--fg);font-weight:600">${esc(l.slice(0,i))}:</b>${lk(l.slice(i+1))}</span>`:`<span class="d">${lk(l)}</span>`};
 v.innerHTML=`<h1>${isPT()?'Suplementação de '+esc(stName()):'Suplementação'}</h1><p class="sub">${isPT()?'Suplementos recomendados a este aluno':'Os suplementos que o Pedro te recomendou'}</p>${selStudent()}${foodTabs()}
 ${sups.length?`<div class="list" style="margin-top:12px">${sups.map(m=>`<div class="meal"><div class="top"><b>${esc(supName(m))}</b>${isPT()?`<button class="del" data-del="${m.id}" aria-label="Apagar">×</button>`:''}</div>${String(m.descricao||'').split('\n').filter(Boolean).map(row).join('')}</div>`).join('')}</div>`:`<p class="empty" style="margin-top:16px">${isPT()?'Ainda sem suplementos para este aluno.':'O Pedro ainda não te recomendou suplementos.'}</p>`}
-${isPT()?`<h2>Novo suplemento</h2><form class="add" id="fsup"><label class="full">Suplemento<input id="s-n" placeholder="ex.: Creatina monohidratada" required></label><label>Dose<input id="s-d" placeholder="5 g por dia"></label><label>Quando<input id="s-q" placeholder="todos os dias"></label><label class="full">Sugestão de compra<input id="s-c" placeholder="marca, tamanho"></label><button class="btn" type="submit">Adicionar suplemento</button></form>`:''}
+${isPT()?`<h2>Novo suplemento</h2><form class="add" id="fsup"><label class="full">Suplemento<input id="s-n" placeholder="ex.: Creatina monohidratada" required></label><label>Dose<input id="s-d" placeholder="5 g por dia"></label><label>Quando<input id="s-q" placeholder="todos os dias"></label><label class="full">Sugestão de compra<input id="s-c" placeholder="marca, tamanho"></label><label class="full">Link da loja<input id="s-l" type="url" placeholder="https://..."></label><button class="btn" type="submit">Adicionar suplemento</button></form>`:''}
 <p class="sub" style="margin-top:14px;font-size:13px">Os suplementos complementam a alimentação, não a substituem. Em caso de doença ou medicação, fala primeiro com o médico.</p>`;
 bindSel(v);bindFood(v);
 v.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{await q(sb.from('refeicoes').delete().eq('id',b.dataset.del));render()});
-const f=$('#fsup');if(f)f.onsubmit=async e=>{e.preventDefault();const d=[['Dose','#s-d'],['Quando','#s-q'],['Comprar','#s-c']].map(([k,i])=>{const x=$(i).value.trim();return x?k+': '+x:''}).filter(Boolean).join('\n');
+const f=$('#fsup');if(f)f.onsubmit=async e=>{e.preventDefault();const d=[['Dose','#s-d'],['Quando','#s-q'],['Comprar','#s-c'],['Loja','#s-l']].map(([k,i])=>{const x=$(i).value.trim();return x?k+': '+x:''}).filter(Boolean).join('\n');
 await q(sb.from('refeicoes').insert({aluno_id:S.student,nome:'Suplemento: '+$('#s-n').value.trim(),descricao:d,kcal:null,proteina:null}));render()};
 }
 
