@@ -91,7 +91,7 @@ nav button svg{width:22px;height:22px}nav button[aria-current=page]{color:var(--
 const SB_URL='https://ftevvmvdoggwhwkxpwlf.supabase.co';
 const SB_KEY='sb_publishable_a7Gp9bjkAyPaUTav_X8CMA_yNV8b7JX';
 const sb=supabase.createClient(SB_URL,SB_KEY);
-const S={me:null,tab:null,day:(new Date().getDay()+6)%7,student:null,students:[],open:null,authMode:'entrar'};
+const S={food:'plano',me:null,tab:null,day:(new Date().getDay()+6)%7,student:null,students:[],open:null,authMode:'entrar'};
 const DAYS=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
 const DIAS=['segunda','terça','quarta','quinta','sexta','sábado','domingo'];
 const $=s=>document.querySelector(s);
@@ -238,11 +238,12 @@ async function vMedidas(v){
 // ---------- alimentação ----------
 async function vComida(v){
  if(isPT()&&!S.student){v.innerHTML='<h1>Alimentação</h1>'+selStudent();return}
+if(S.food==='compras')return vCompras(v);
  const meals=await q(sb.from('refeicoes').select('*').eq('aluno_id',sid()).order('id'));
  const k=meals.reduce((a,m)=>a+(m.kcal||0),0),pr=meals.reduce((a,m)=>a+(m.proteina||0),0);
  const porDia=meals.some(m=>/^(Seg|Ter|Qua|Qui|Sex|Sáb|Dom):/m.test(m.descricao||''));
  const doDia=t=>{if(!porDia)return t||'';const l=(t||'').split('\n').find(x=>x.startsWith(DAYS[S.day]+':'));return l?l.slice(DAYS[S.day].length+1).trim():(/^(Seg|Ter|Qua|Qui|Sex|Sáb|Dom):/m.test(t||'')?'—':t||'')};
- v.innerHTML=`<h1>${isPT()?'Alimentação de '+esc(stName()):'Sugestões do dia'}</h1><p class="sub">${isPT()?'Escreve sugestões para cada refeição':'Plano preparado pelo Pedro para o teu objetivo'}</p>${selStudent()}
+ v.innerHTML=`<h1>${isPT()?'Alimentação de '+esc(stName()):'Sugestões do dia'}</h1><p class="sub">${isPT()?'Escreve sugestões para cada refeição':'Plano preparado pelo Pedro para o teu objetivo'}</p>${selStudent()}${foodTabs()}
  ${meals.length?`<h2>Total diário</h2><div class="stats"><div class="stat"><span>Energia</span><strong>${k}</strong> kcal</div>${pr?`<div class="stat"><span>Proteína</span><strong>${pr}</strong> g</div>`:''}<div class="stat"><span>Refeições</span><strong>${meals.length}</strong></div></div>
  ${porDia?`<div class="days">${DAYS.map((d,i)=>`<button data-fday="${i}" aria-pressed="${i===S.day}">${d}</button>`).join('')}</div>`:''}
  <h2>Refeições${porDia?' de '+DIAS[S.day]:''}</h2><div class="list">${meals.map(m=>`<div class="meal"><div class="top"><b>${esc(m.nome)}</b><span class="d">${m.kcal?m.kcal+' kcal':''}${m.proteina?' · '+m.proteina+' g prot.':''}${isPT()?` <button class="del" data-del="${m.id}" aria-label="Apagar">×</button>`:''}</span></div><span style="white-space:pre-line">${esc(doDia(m.descricao))}</span></div>`).join('')}</div>`
@@ -251,10 +252,75 @@ async function vComida(v){
  <label>kcal<input type="number" id="r-k" inputmode="numeric"></label><label>Proteína (g)<input type="number" id="r-p" inputmode="numeric"></label><button class="btn" type="submit">Adicionar refeição</button></form>`:''}
  <p class="sub" style="margin-top:14px;font-size:13px">Sugestões gerais de alimentação saudável. Em caso de condição clínica, segue a orientação de um nutricionista.</p>`;
  bindSel(v);
- v.querySelectorAll('[data-fday]').forEach(b=>b.onclick=()=>{S.day=+b.dataset.fday;render()});
+ bindFood(v);v.querySelectorAll('[data-fday]').forEach(b=>b.onclick=()=>{S.day=+b.dataset.fday;render()});
  v.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{await q(sb.from('refeicoes').delete().eq('id',b.dataset.del));render()});
  const f=$('#fr');if(f)f.onsubmit=async e=>{e.preventDefault();const n=id=>{const x=$(id).value;return x===''?null:+x};
   await q(sb.from('refeicoes').insert({aluno_id:S.student,nome:$('#r-n').value.trim(),descricao:$('#r-d').value.trim(),kcal:n('#r-k'),proteina:n('#r-p')}));render()};
+}
+
+// ---------- lista de compras ----------
+function foodTabs(){return `<div class="tabs2"><button data-food="plano" aria-pressed="${S.food!=='compras'}">Plano</button><button data-food="compras" aria-pressed="${S.food==='compras'}">Lista de compras</button></div>`}
+function bindFood(v){v.querySelectorAll('[data-food]').forEach(b=>b.onclick=()=>{S.food=b.dataset.food;render()})}
+const SEC=[
+['Talho e peixaria',['frango','peru','carne','vaca','porco','novilho','bife','hamburguer','hambúrguer','salmão','salmao','pescada','peixe','bacalhau','dourada','robalo','camarão','sardinha','pota','lula','fiambre','presunto']],
+['Frutas e legumes',['banana','maçã','maca','pera','laranja','kiwi','morango','frutos vermelhos','mirtilo','uva','ananás','manga','melão','melancia','fruta','abacate','legume','salada','alface','rúcula','espinafre','tomate','pepino','brócolo','brocolo','cenoura','courgete','curgete','abóbora','cebola','alho','pimento','cogumelo','batata','espargo','feijão verde','limão']],
+['Laticínios e ovos',['iogurte','skyr','kefir','leite','queijo','requeijão','manteiga','natas','ovo','clara']],
+['Padaria e cereais',['pão','pao','tosta','aveia','flocos','cereais','granola','muesli','arroz','massa','esparguete','quinoa','cuscuz','wrap','tortilha','panqueca','bolacha','bolo de arroz']],
+['Mercearia',['manteiga de amendoim','pasta de amendoim','atum','azeite','óleo','frutos secos','amêndoa','amendoa','noz','nozes','caju','amendoim','avelã','sementes','chia','linhaça','mel','canela','cacau','chocolate','grão','feijão','lentilha','ervilha','whey','proteína','proteina','café','chá','marmelada','compota','bebida vegetal']]
+];
+const NUM={um:1,uma:1,dois:2,duas:2,'três':3,tres:3,quatro:4,cinco:5,meia:.5,meio:.5};
+const UNI=[['kg','kg'],['gr','g'],['g','g'],['ml','ml'],['cl','cl'],['l','L'],['unidades','un'],['unidade','un'],['un','un'],['fatias','fatias'],['fatia','fatias'],['colheres de sopa','c. sopa'],['colher de sopa','c. sopa'],['colheres de chá','c. chá'],['colher de chá','c. chá'],['colheres','c. sopa'],['colher','c. sopa'],['chávenas','chávenas'],['chávena','chávenas'],['copos','copos'],['copo','copos'],['latas','latas'],['lata','latas'],['punhados','punhados'],['punhado','punhados'],['scoops','scoops'],['scoop','scoops'],['doses','doses'],['dose','doses']];
+function secOf(n){const s=n.toLowerCase();let best=null,len=0;SEC.forEach(([sec,ws])=>ws.forEach(w=>{if(s.includes(w)&&w.length>len){best=sec;len=w.length}}));return best||'Outros'}
+function parseItem(raw){
+let s=raw.toLowerCase().replace(/\(.*?\)/g,' ').replace(/[.!]+$/,'').replace(/\s+/g,' ').trim();
+s=s.replace(/^(um|uma)\s+(pouco|bocado)\s+de\s+/,'');
+if(!s||s==='—'||s==='-')return null;
+let qty=null,unit='un',m=s.match(/^(\d+(?:[.,]\d+)?)\s*/);
+if(m){qty=parseFloat(m[1].replace(',','.'));s=s.slice(m[0].length)}
+else{const w=s.split(' ')[0];if(NUM[w]!=null&&s.split(' ').length>1){qty=NUM[w];s=s.slice(w.length).trim()}}
+if(qty!=null){for(const [k,u] of UNI){if(s===k||s.startsWith(k+' ')){unit=u;s=s.slice(k.length).trim();break}}}
+s=s.replace(/\s+(grelhad|cozid|assad|mexid|estufad|cozinhad|salteado|escalfad)[oa]s?\b.*$/,'').replace(/\s+(no forno|na airfryer|ao vapor|a vapor)\b.*$/,'');
+s=s.replace(/^(de|do|da|dos|das)\s+/,'').replace(/^(o|a|os|as)\s+/,'').trim();
+if(s.length<2)return null;
+if(unit==='kg'){qty*=1000;unit='g'}if(unit==='L'){qty*=1000;unit='ml'}if(unit==='cl'){qty*=10;unit='ml'}
+return {name:s,qty,unit};
+}
+function splitItems(t){return t.split(/,|;|\+|\s+e\s+|\s+com\s+|\s+\/\s+/).map(x=>x.split(/\s+ou\s+/)[0]).map(x=>x.trim()).filter(Boolean)}
+function shopList(meals){
+const map=new Map();
+const add=(txt,times)=>splitItems(txt).forEach(r=>{const it=parseItem(r);if(!it)return;
+const key=it.name.replace(/(ões|ães)$/,'ão').replace(/s$/,'');let e=map.get(key);
+if(!e){e={key,name:it.name,u:{},vezes:0};map.set(key,e)}
+if(it.qty!=null)e.u[it.unit]=(e.u[it.unit]||0)+it.qty*times;else e.vezes+=times});
+meals.forEach(m=>{const lines=String(m.descricao||'').split('\n').map(l=>l.trim()).filter(Boolean);
+lines.forEach(l=>{const d=l.match(/^(Seg|Ter|Qua|Qui|Sex|Sáb|Dom)\s*:\s*(.*)$/i);if(d)add(d[2],1);else add(l,7)})});
+const out={};[...map.values()].forEach(e=>{const s=secOf(e.name);(out[s]=out[s]||[]).push(e)});
+return out;
+}
+function fmtQ(e){const p=Object.entries(e.u).map(([u,q])=>{q=Math.round(q*10)/10;
+if(u==='g'&&q>=1000)return (q/1000).toString().replace('.',',')+' kg';if(u==='ml'&&q>=1000)return (q/1000).toString().replace('.',',')+' L';
+return String(q).replace('.',',')+(u==='un'?'':' '+(q===1?u.replace(/s$/,''):u))});
+if(e.vezes)p.push(e.vezes+'× na semana');return p.join(' + ')}
+const ckKey=()=>'pd-compras-'+sid();
+function getCk(){try{return new Set(JSON.parse(localStorage.getItem(ckKey())||'[]'))}catch(e){return new Set()}}
+function setCk(s){try{localStorage.setItem(ckKey(),JSON.stringify([...s]))}catch(e){}}
+async function vCompras(v){
+const meals=await q(sb.from('refeicoes').select('*').eq('aluno_id',sid()).order('id'));
+const L=shopList(meals),ck=getCk(),order=[...SEC.map(s=>s[0]),'Outros'].filter(s=>L[s]);
+const total=order.reduce((a,s)=>a+L[s].length,0),feitos=order.reduce((a,s)=>a+L[s].filter(e=>ck.has(e.key)).length,0);
+v.innerHTML=`<h1>${isPT()?'Compras de '+esc(stName()):'Lista de compras'}</h1><p class="sub">Para a semana inteira, feita a partir do plano de alimentação</p>${selStudent()}${foodTabs()}
+${total?`<div class="progress"><i style="width:${Math.round(feitos/total*100)}%"></i></div><p class="sub">${feitos} de ${total} no carrinho</p>
+${order.map(s=>`<h2>${s}</h2><div class="list">${L[s].sort((a,b)=>a.name.localeCompare(b.name,'pt')).map(e=>`<div class="ex ${ck.has(e.key)?'done':''}"><label class="chk"><input type="checkbox" data-ck="${esc(e.key)}" ${ck.has(e.key)?'checked':''}><span><span class="n">${esc(e.name[0].toUpperCase()+e.name.slice(1))}</span><br><span class="d">${esc(fmtQ(e))}</span></span></label></div>`).join('')}</div>`).join('')}
+<button class="btn" id="copy" style="width:100%;margin-top:16px">Copiar lista</button>
+<button class="btn ghost" id="newweek" style="width:100%;margin-top:8px">Nova semana (desmarcar tudo)</button>
+<p class="sub" style="margin-top:14px;font-size:13px">As quantidades só são somadas quando estão escritas no plano (ex.: "150 g frango", "2 ovos"). Sem quantidade, aparece quantas vezes o alimento entra na semana.</p>`
+:`<p class="empty" style="margin-top:16px">${isPT()?'Este aluno ainda não tem plano de alimentação.':'O Pedro ainda não te deixou um plano de alimentação.'}</p>`}
+<div class="toast" id="toast"></div>`;
+bindSel(v);bindFood(v);
+v.querySelectorAll('[data-ck]').forEach(c=>c.onchange=()=>{const s=getCk();c.checked?s.add(c.dataset.ck):s.delete(c.dataset.ck);setCk(s);render()});
+const nw=$('#newweek');if(nw)nw.onclick=()=>{setCk(new Set());render()};
+const cp=$('#copy');if(cp)cp.onclick=async()=>{const txt='Lista de compras\n'+order.map(s=>'\n'+s.toUpperCase()+'\n'+L[s].map(e=>'- '+e.name+(fmtQ(e)?' ('+fmtQ(e)+')':'')).join('\n')).join('\n');
+try{await navigator.clipboard.writeText(txt);$('#toast').textContent='Lista copiada. Podes colar no WhatsApp ou nas notas.'}catch(e){$('#toast').textContent='Não consegui copiar neste telemóvel.'}};
 }
 
 // ---------- mensagens ----------
